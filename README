@@ -1,0 +1,73 @@
+DESCRIPTION:
+	The CheckersFX is 2-player checkers game written in the Java language
+	using the JavaFX platform.
+
+	The source code is divided into two .java files:
+
+		CheckersFX.java
+		GameLogic.java
+
+	CheckersFX.java contains the classes for the GUI of the checkers game
+	as well as the main program itself. GameLogic.java implements the game
+	rules as well as makes moves for the player.
+
+	CheckersFX currently lacks an AI for the player to play against. It also
+	doesn't keep track of the current turn.
+
+REQUIREMENTS:
+	CheckersFX requires either JDK 8 or OpenJDK 8 or later to compile and run.
+	Additionally, it also requires the JavaFX or OpenJFX libraries. Depending on
+	what version of the JDK or OpenJDK you have installed, these libraries may
+	need to be installed seperately.
+
+	(See the RESOURCES section for information on installing a version of the JDK
+	or JavaFX libraries.)
+
+COMPILING:
+	To compile CheckersFX open the terminal and change the directory to one
+	containing the CheckersFX.java and GameLogic.java source files. Use the
+	following command to compile them:
+
+		javac *.java
+
+	If this fails you may need to use the following command instead:
+
+		javac --module-path=</path/to/javafx/libraries/on/your/computer> --add-modules=javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web CheckersFX.java
+
+	If you are using a distribution of Linux and using the OpenJFX libraries
+	then they path where they are installe may be:
+
+		/usr/share/openjfx/lib
+
+RUNNING:
+	After you have compiled the source files, you can run the CheckersFX
+	program using the following command from the directory with the compiled
+	.class files:
+
+		java CheckersFX
+
+	If you had to specify a path to the JavaFX libraries when compiling you
+	will need to use the following command instead:
+
+		java --module-path=</path/to/javafx/libraries/on/your/computer> --add-modules=javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web CheckersFX
+
+ROADMAP:
+
+	-CheckersFX currently lacks an AI for the player to play against.
+
+	-A feature needs to be added to keep track of turns. Players also need
+	to be prompted for what color they will play as.
+
+	-Double jumps need to be added.
+
+	-The ability to restart the game after it has ended needs to be implemented.
+
+	-While units become kings when the reach the opposite side of the board,
+	there is currently no change to their visual representation to indicate
+	this.
+
+RESOURCES:
+	The OpenJFX libraries and documentation for it are available at the
+	following website:
+
+		https://openjfx.io/
