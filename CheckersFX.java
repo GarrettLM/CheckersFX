@@ -1,6 +1,6 @@
 /*	Author: Garrett Maitland
-	Version: 0.1
-	Date: September 14, 2019
+	Version: 0.2
+	Date: October 1, 2019
 */
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -100,6 +100,10 @@ class Tile extends StackPane {
 		return TILENUMBER;
 	}
 
+	public int getNumber() {
+		return TILENUMBER;
+	}
+
 	//Returns and removes the unit currently placed
 	//on the tile.
 	public Piece removeUnit() {
@@ -160,6 +164,7 @@ class TileFilter implements EventHandler<MouseEvent> {
 class Piece extends Circle {
 	public final String PLAYER;
 	private boolean king;
+	private int x, y;
 
 	//s is the String of the player that owns the piece.
 	//c is the Color of the piece.
@@ -167,6 +172,20 @@ class Piece extends Circle {
 		super(30, c);
 		king = false;
 		PLAYER = s;
+		x = 0;
+		y = 0;
+	}
+
+	public Piece(String s, Color c, boolean isKing, int xCoord, int yCoord) {
+		super(30, c);
+		king = isKing;
+		PLAYER = s;
+		x = xCoord;
+		y = yCoord;
+	}
+
+	public Piece clone() {
+		return copy();
 	}
 
 	public boolean isKing() {
@@ -183,5 +202,22 @@ class Piece extends Circle {
 
 	public boolean isWhite() {
 		return PLAYER.equals("white");
+	}
+
+	public Piece copy() {
+		return new Piece(PLAYER, (Color)super.getFill(), king, x, y);
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setCoord(int x, int y) {
+		this.x = x;
+		this.y = y;
 	}
 }

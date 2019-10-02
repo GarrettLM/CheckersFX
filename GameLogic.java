@@ -1,6 +1,6 @@
 /*	Author Garrett Maitland
-	Version 0.1
-	Date: September 14, 2019
+	Version 0.2
+	Date: October 1, 2019
 
 	This class is responsible for implementing the rules for the chess game
 	and executing legal moves and attacks.
@@ -12,6 +12,7 @@ public class GameLogic {
 	//The following two variables count how many pieces are left for each player.
 	private int blackPieces;
 	private int whitePieces;
+	private CheckersAI ai;
 
 	//t is an array of Tile objects used for the game board.
 	public GameLogic(Tile[] t) {
@@ -20,6 +21,7 @@ public class GameLogic {
 		tiles = t;
 		blackPieces = 12;
 		whitePieces = 12;
+		ai = new CheckersAI();
 	}
 
 	//This method accepts input from the TileFilter class.
@@ -29,13 +31,31 @@ public class GameLogic {
 		//then moves the unit.
 		if (isLegalMove(tileNumber)) {
 			move(tileNumber);
-			System.out.println(previousTile + "-"+ tileNumber);
+			String move = previousTile + "-"+ tileNumber;
+			System.out.println(move);
+			Action aisMove = ai.nextMove(move);
+			previousTile = aisMove.getStart();
+			if (aisMove.attack) {
+				attack(aisMove.getDest());
+			} else {
+				move(aisMove.getDest());
+			}
+			System.out.println(aisMove.toString());
 			previousTile = -1;
 		} else if (isLegalAttack(tileNumber)) {
 			//If the move was a legal attack the attack is carried out.
 			//(This does not implement double jumps yet.)
-			System.out.println(previousTile + "x" + tileNumber);
+			String move = previousTile + "-"+ tileNumber;
+			System.out.println(move);
 			attack(tileNumber);
+			Action aisMove = ai.nextMove(move);
+			previousTile =  aisMove.getStart();
+			if (aisMove.attack) {
+				attack(aisMove.getDest());
+			} else {
+				move(aisMove.getDest());
+			}
+			System.out.println(aisMove.toString());
 			previousTile = -1;
 		} else
 			previousTile = tileNumber;
