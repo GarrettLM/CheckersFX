@@ -1,6 +1,6 @@
 /*	Author: Garrett Maitland
-	Version: 0.5
-	Date: October 11, 2019
+	Version: 0.6
+	Date: October 12, 2019
 */
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,7 +118,7 @@ class GameState {
 		for (Piece p : playersPieces) {
 			int x = p.getX();
 			int y = p.getY();
-			if ((p.isKing() || p.isBlack()) && (x > 2 && y < 6) && board[y+1][x-1] != null && (board[y+1][x-1].isWhite() != p.isWhite()) && board[y+2][x-2] == null) {
+			if ((p.isKing() || p.isBlack()) && (x > 1 && y < 6) && board[y+1][x-1] != null && (board[y+1][x-1].isWhite() != p.isWhite()) && board[y+2][x-2] == null) {
 				if (!forcedJump) {
 					forcedJump = true;
 					actions.clear();
@@ -132,14 +132,14 @@ class GameState {
 				}
 				actions.add(new Action(x, y, x+2, y+2, x+1, y+1));
 			}
-			if ((p.isKing() || p.isWhite()) && (x > 2 && y > 2) && board[y-1][x-1] != null && (board[y-1][x-1].isWhite() != p.isWhite()) && board[y-2][x-2] == null) {
+			if ((p.isKing() || p.isWhite()) && (x > 1 && y > 1) && board[y-1][x-1] != null && (board[y-1][x-1].isWhite() != p.isWhite()) && board[y-2][x-2] == null) {
 				if (!forcedJump) {
 					forcedJump = true;
 					actions.clear();
 				}
 				actions.add(new Action(x, y, x-2, y-2, x-1, y-1));
 			}
-			if ((p.isKing() || p.isWhite()) && (x < 6 && y > 2) && board[y-1][x+1] != null && (board[y-1][x+1].isWhite() != p.isWhite()) && board[y-2][x+2] == null) {
+			if ((p.isKing() || p.isWhite()) && (x < 6 && y > 1) && board[y-1][x+1] != null && (board[y-1][x+1].isWhite() != p.isWhite()) && board[y-2][x+2] == null) {
 				if (!forcedJump) {
 					forcedJump = true;
 					actions.clear();

@@ -1,17 +1,23 @@
 /*	Author: Garrett Maitland
-	Version: 0.5
-	Date: October 11, 2019
+	Version: 0.6
+	Date: October 12, 2019
 */
 import java.util.ArrayList;
+import java.util.Random;
 
 public class CheckersAI {
 	private GameState currentState;
 	private Evaluator evaluator;
-	public static final int DEPTH = 4;
+	private Random rand = new Random();
+	public static final int DEPTH = 6;
 
 	public CheckersAI() {
 		currentState = new GameState();
-		evaluator = new DumbEvaluator();
+		evaluator = new SimpleEvaluator();
+	}
+
+	public void newGame() {
+		currentState = new GameState();
 	}
 
 	public Action nextMove() {
@@ -25,7 +31,6 @@ public class CheckersAI {
 		//currentState.printState();
 		Action optimalMove = minimax();
 		currentState = currentState.successorState(optimalMove);
-		currentState.printState();
 		return optimalMove;
 	}
 
@@ -36,12 +41,14 @@ public class CheckersAI {
 	public Action minimax() {
 		ArrayList<Action> moves = currentState.possibleMoves();
 		Action optimalMove = null;
-		int max = Integer.MIN_VALUE;
+		int min = Integer.MAX_VALUE;
 
 		for (Action m : moves) {
-			int temp = max(currentState.successorState(m), DEPTH);
-			if (temp > max)
+			int temp = min(currentState.successorState(m), DEPTH);
+			if ((temp + rand.nextDouble()) < (min + rand.nextDouble())) {
+				min = temp;
 				optimalMove = m;
+			}
 		}
 
 		return optimalMove;
@@ -54,10 +61,24 @@ public class CheckersAI {
 		int max = Integer.MIN_VALUE;
 		ArrayList<Action> moves = state.possibleMoves();
 		for (Action m : moves) {
-			int temp = max(state.successorState(m), depth-1);
+			int temp = min(state.successorState(m), depth-1);
 			if (temp > max)
 				max = temp;
 		}
 		return max;
+	}
+
+	public int min(GameState state, int depth) {
+		if (depth == 1 || state.isTerminal())
+			return eval(state);
+
+		int min = Integer.MAX_VALUE;
+		ArrayList<Action> moves = state.possibleMoves();
+		for (Action m : moves) {
+			int temp = max(state.successorState(m), depth-1);
+			if (temp < min)
+				min = temp;
+		}
+		return min;
 	}
 }
