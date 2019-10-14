@@ -14,6 +14,7 @@ public class CheckersAI {
 	public CheckersAI() {
 		currentState = new GameState();
 		evaluator = new SimpleEvaluator();
+		evaluator01 = new AdjacencyEvaluator();
 	}
 
 	public void newGame() {

@@ -32,3 +32,37 @@ class SimpleEvaluator extends Evaluator {
 		return s.getPlayersScore() - s.getOpponentsScore();
 	}
 }
+/*
+ Class AdjacencyEvaluator
+ used to check for adjacent pieces of both player and opponnent.
+ */
+class AdjacencyEvaluator extends Evaluator {
+	public int playerEvaluate(GameState s) {
+		int playerCount = 0;
+
+
+		if (s.playerPieces[(get.x) - 1][(get.y) - 1] == true)
+			playerCount++;
+		if (s.playerPieces[(get.x) - 1][(get.y) + 1] == true)
+			playerCount++;
+		if (s.playerPieces[(get.x) + 1][(get.y) - 1] == true)
+			playerCount++;
+		if (s.playerPieces[(get.x) + 1][(get.y) + 1] == true)
+			playerCount++;
+		return playerCount;
+	}
+	public int opponentEvaluate(GameState s){
+		int opponentCount = 0;
+
+		if (s.opponentPieces[(get.x)-1][(get.y)-1])
+			opponentCount++;
+		if (s.opponentPieces[(get.x)-1][(get.y)+1])
+			opponentCount++;
+		if (s.opponentPieces[(get.x)+1][(get.y)-1])
+			opponentCount++;
+		if (s.opponentPieces[(get.x)+1][(get.y)+1])
+			opponentCount++;
+		return opponentCount;
+	}
+
+}
