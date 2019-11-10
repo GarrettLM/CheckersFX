@@ -1,12 +1,13 @@
 /*	Author: Garrett Maitland
-	Version: 0.6
-	Date: October 12, 2019
+	Version: 0.8
+	Date: November 10, 2019
 */
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
@@ -16,6 +17,7 @@ import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import java.util.ArrayList;
 
 //	This class is responsible for the GUI and running the game.
 public class CheckersFX extends Application {
@@ -24,6 +26,7 @@ public class CheckersFX extends Application {
 	private static Tile prevTile = null;
 	private static GameLogic logic = null;
 	private static Stage primaryStage;
+	private static VBox history, availableMoves;
 
 /*	public void start(Stage stage) {
 		logic = new GameLogic();
@@ -124,12 +127,19 @@ public class CheckersFX extends Application {
 			}
 		}
 
-		Scene s = new Scene(board, 640, 640);
+		history = new VBox();
+		history.setPrefSize(200, 640);
+		availableMoves = new VBox();
+		availableMoves.setPrefSize(200, 640);
+		HBox window = new HBox(history, board, availableMoves);
+
+		Scene s = new Scene(window, 1040, 640);
 		primaryStage.setScene(s);
 		primaryStage.setTitle("Checkers");
 		primaryStage.show();
 
 		promptColor();
+		getAvailableMoves();
 	}
 
 	public void promptColor() {
@@ -156,11 +166,25 @@ public class CheckersFX extends Application {
 	}
 
 	public void showMove(Action move) {
+		Piece movedUnit = tiles[move.startY][move.startX].removeUnit();
 		if (move.attack) {
+			while (move.hasJump()) {
+				tiles[move.atkY][move.atkX].removeUnit();
+				move = move.getJump();
+			}
 			tiles[move.atkY][move.atkX].removeUnit();
 		}
-		Piece movedUnit = tiles[move.startY][move.startX].removeUnit();
 		tiles[move.destY][move.destX].addUnit(movedUnit);
+		history.getChildren().add(new Label(move.toNotation()));
+		getAvailableMoves();
+	}
+
+	public void getAvailableMoves() {
+		availableMoves.getChildren().clear();
+		ArrayList<Action> validMoves = logic.getValidMoves();
+		for (Action v : validMoves) {
+			availableMoves.getChildren().add(new MoveButton(v));
+		}
 	}
 
 	public void gameover(String message) {
@@ -262,6 +286,16 @@ public class CheckersFX extends Application {
 					prevTile = TILE;
 			}	else
 				prevTile = TILE;
+		}
+	}
+
+	private class MoveButton extends Button {
+		private Action move;
+
+		private MoveButton(Action m) {
+			super(m.toNotation());
+			move = m;
+			setOnAction(e -> logic.makeMove(move));
 		}
 	}
 }

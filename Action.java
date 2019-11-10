@@ -1,8 +1,9 @@
 /*	Author: Garrett Maitland
-	Version: 0.6
-	Date: October 12, 2019
+	Version: 0.8
+	Date: November 10, 2019
 */
 import java.util.StringTokenizer;
+import java.util.ArrayList;
 
 public class Action {
 	public final boolean attack;
@@ -60,6 +61,17 @@ public class Action {
 		}
 	}
 
+	public Action(Action move, Action jump) {
+		this.startX = move.startX;
+		this.startY = move.startY;
+		this.destX = move.destX;
+		this.destY = move.destY;
+		this.atkX = move.atkX;
+		this.atkY = move.atkY;
+		this.attack = true;
+		this.jump = jump;
+	}
+
 	public Action(String move) {
 		StringTokenizer st;
 		if (move.contains("x")) {
@@ -97,18 +109,29 @@ public class Action {
 		return jump;
 	}
 
+	public boolean hasJump() {
+		return jump != null;
+	}
+
 	public String toString() {
-		if (attack)
-			return startX + ", " + startY + " x " + destX + ", " + destY;
-		else
+		if (attack) {
+			if (jump == null)
+				return startX + ", " + startY + " x " + destX + ", " + destY;
+			else
+				return startX + ", " + startY + " x " + destX + ", " + destY + "\n" + jump.toString();
+		} else
 			return startX + ", " + startY + " - " + destX + ", " + destY;
 	}
 
 	public String toNotation() {
 		int[][] board = {{0,1,0,2,0,3,0,4},{5,0,6,0,7,0,8,0},{0,9,0,10,0,11,0,12},{13,0,14,0,15,0,16,0},{0,17,0,18,0,19,0,20},{21,0,22,0,23,0,24,0},{0,25,0,26,0,27,0,28},{29,0,30,0,31,0,32,0}};
-		if (attack)
-			return board[startY][startX] + "x" + board[destY][destX];
-		else
+
+		if (attack) {
+			if (jump == null)
+				return board[startY][startX] + "x" + board[destY][destX];
+			else
+				return board[startY][startX] + "x" + board[destY][destX] + "\n" + jump.toNotation();
+		} else
 			return board[startY][startX] + "-" + board[destY][destX];
 	}
 
