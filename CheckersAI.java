@@ -8,6 +8,7 @@ import java.util.Random;
 public class CheckersAI {
 	private GameState currentState;
 	private Evaluator evaluator;
+	private Evaluator evaluator01;
 	private Random rand = new Random();
 	public static final int DEPTH = 6;
 

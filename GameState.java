@@ -10,8 +10,8 @@ import javafx.scene.paint.Color;
 
 class GameState {
 	private Piece[][] board;
-	private ArrayList<Piece> playersPieces;
-	private ArrayList<Piece> opponentsPieces;
+	public ArrayList<Piece> playersPieces;
+	public ArrayList<Piece> opponentsPieces;
 	public final Action action;	//move that lead to the current state
 
 	public GameState() {
@@ -106,6 +106,7 @@ class GameState {
 	public int getOpponentsScore() {
 		return opponentsPieces.size();
 	}
+
 
 	public GameState successorState(Action move) {
 		return new GameState(this, move);

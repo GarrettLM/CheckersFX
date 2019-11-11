@@ -3,6 +3,8 @@
 	Date: October 11, 2019
 */
 import java.util.Random;
+import java.util.ArrayList;
+
 
 public abstract class Evaluator {
 	public Evaluator() {}
@@ -36,33 +38,53 @@ class SimpleEvaluator extends Evaluator {
  Class AdjacencyEvaluator
  used to check for adjacent pieces of both player and opponnent.
  */
-class AdjacencyEvaluator extends Evaluator {
+class AdjacencyEvaluator extends Evaluator{
+	public ArrayList<Piece> player;
+	public ArrayList<Piece> opponent;
+
+	public AdjacencyEvaluator() { super(); }
+
+	public int evaluate(GameState s) {
+		return playerEvaluate(s) - opponentEvaluate(s);
+	}
+
 	public int playerEvaluate(GameState s) {
+		player = s.playerPieces;
 		int playerCount = 0;
 
+		for(int i = 0; i <= player.size(); i++){
+			if (doesPieceExist(player, player[i].getX() - 1 , player[i].getY() - 1)== true)
+				playerCount++;
+			if (doesPieceExist(player, player[i].getX() - 1 , player[i].getY() + 1) == true)
+				playerCount++;
+			if (doesPieceExist(player, player[i].getX() + 1 , player[i].getY() - 1) == true)
+				playerCount++;
+			if (doesPieceExist(player, player[i].getX() + 1 , player[i].getY() + 1) == true)
+				playerCount++;
+			return playerCount;
+		}
 
-		if (s.playerPieces[(get.x) - 1][(get.y) - 1] == true)
-			playerCount++;
-		if (s.playerPieces[(get.x) - 1][(get.y) + 1] == true)
-			playerCount++;
-		if (s.playerPieces[(get.x) + 1][(get.y) - 1] == true)
-			playerCount++;
-		if (s.playerPieces[(get.x) + 1][(get.y) + 1] == true)
-			playerCount++;
-		return playerCount;
 	}
 	public int opponentEvaluate(GameState s){
+		opponent = s.opponentPieces;
 		int opponentCount = 0;
 
-		if (s.opponentPieces[(get.x)-1][(get.y)-1])
+		if (doesPieceExist(opponent, opponent[i].getX() - 1 , opponent[i].getY() - 1) == true)
 			opponentCount++;
-		if (s.opponentPieces[(get.x)-1][(get.y)+1])
+		if (doesPieceExist(opponent, opponent[i].getX() - 1 , opponent[i].getY() + 1) == true)
 			opponentCount++;
-		if (s.opponentPieces[(get.x)+1][(get.y)-1])
+		if (doesPieceExist(opponent, opponent[i].getX() + 1 , opponent[i].getY() - 1) == true)
 			opponentCount++;
-		if (s.opponentPieces[(get.x)+1][(get.y)+1])
+		if (doesPieceExist(opponent, opponent[i].getX() + 1 , opponent[i].getY() + 1) == true)
 			opponentCount++;
 		return opponentCount;
+	}
+
+	public boolean doesPieceExist(ArrayList<Piece> p, int x, int y){
+		Piece temp = p[0].copy;
+		temp.setCoord(x, y);
+
+		return p.contains(temp);
 	}
 
 }
