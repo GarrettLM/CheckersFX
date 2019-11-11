@@ -13,11 +13,13 @@ class GameState {
 	private ArrayList<Piece> playersPieces;
 	private ArrayList<Piece> opponentsPieces;
 	public final Action action;	//move that lead to the current state
+	private boolean kingedTurn;	//true if the last piece to move was kinged this turn
 
 	public GameState() {
 		playersPieces = new ArrayList<Piece>();
 		opponentsPieces = new ArrayList<Piece>();
 		board = new Piece[8][8];
+		kingedTurn = false;
 
 		//i is the row (y-coordinate) and j is the column (x-coordinate)
 		for (int i = 0; i < 3; i++) {
@@ -60,6 +62,7 @@ class GameState {
 		board = new Piece[8][8];
 		playersPieces = prevState.cloneOpponentsPieces();
 		opponentsPieces = prevState.clonePlayersPieces();
+		kingedTurn = false;
 
 		for (Piece p : playersPieces) {
 			board[p.getY()][p.getX()] = p;
@@ -76,8 +79,10 @@ class GameState {
 		if (a.attack) {
 			Piece attackedPiece = board[a.atkY][a.atkX];
 			while (a.hasJump()) {
-				if (a.destY == 0 || a.destY == 7)
+				if ((a.destY == 0 || a.destY == 7) && !movedPiece.isKing()) {
 					movedPiece.makeKing();
+					kingedTurn = true;
+				}
 				board[a.atkY][a.atkX] = null;
 				playersPieces.remove(attackedPiece);
 				a = a.getJump();
@@ -88,29 +93,10 @@ class GameState {
 		}
 		movedUnit.setCoord(a.destX, a.destY);
 		board[a.destY][a.destX] = movedUnit;
-		if (a.destY == 0 || a.destY == 7)
-				movedPiece.makeKing();
-
-/*		if (a.attack) {
-			do {
-				board[a.startY][a.startX] = null;
-				board[a.destY][a.destX] = movedPiece;
-				movedPiece.setCoord(a.destX, a.destY);
-				if (a.destY == 0 || a.destY == 7)
-					movedPiece.makeKing();
-				Piece attackedPiece = board[a.atkY][a.atkX];
-				playersPieces.remove(attackedPiece);
-				board[a.atkY][a.atkX] = null;
-				a = a.getJump();
-			} while (a != null);
-		} else {
-			board[a.startY][a.startX] = null;
-			board[a.destY][a.destX] = movedPiece;
-			movedPiece.setCoord(a.destX, a.destY);
-			if (a.destY == 0 || a.destY == 7)
-				movedPiece.makeKing();
-		}*/
-
+		if ((a.destY == 0 || a.destY == 7) && !movedPiece.isKing()) {
+			movedPiece.makeKing();
+			kingedTurn = true;
+		}
 	}
 
 	public ArrayList<Piece> clonePlayersPieces() {
@@ -288,16 +274,16 @@ class GameState {
 		ArrayList<Action> jumps =  new ArrayList<Action>();
 		ArrayList<Action> results = new ArrayList<Action>();
 
-		if ((p.isKing() || p.isBlack()) && (x > 1 && y < 6) && board[y+1][x-1] != null && (board[y+1][x-1].isWhite() != p.isWhite()) && board[y+2][x-2] == null) {
+		if (((p.isKing() && !kingedTurn)|| p.isBlack()) && (x > 1 && y < 6) && board[y+1][x-1] != null && (board[y+1][x-1].isWhite() != p.isWhite()) && board[y+2][x-2] == null) {
 			jumps.add(new Action(x, y, x-2, y+2, x-1, y+1));
 		}
-		if ((p.isKing() || p.isBlack()) && (x < 6 && y < 6) && board[y+1][x+1] != null && (board[y+1][x+1].isWhite() != p.isWhite()) && board[y+2][x+2] == null) {
+		if (((p.isKing() && !kingedTurn)|| p.isBlack()) && (x < 6 && y < 6) && board[y+1][x+1] != null && (board[y+1][x+1].isWhite() != p.isWhite()) && board[y+2][x+2] == null) {
 			jumps.add(new Action(x, y, x+2, y+2, x+1, y+1));
 		}
-		if ((p.isKing() || p.isWhite()) && (x > 1 && y > 1) && board[y-1][x-1] != null && (board[y-1][x-1].isWhite() != p.isWhite()) && board[y-2][x-2] == null) {
+		if (((p.isKing() && !kingedTurn)|| p.isWhite()) && (x > 1 && y > 1) && board[y-1][x-1] != null && (board[y-1][x-1].isWhite() != p.isWhite()) && board[y-2][x-2] == null) {
 			jumps.add(new Action(x, y, x-2, y-2, x-1, y-1));
 		}
-		if ((p.isKing() || p.isWhite()) && (x < 6 && y > 1) && board[y-1][x+1] != null && (board[y-1][x+1].isWhite() != p.isWhite()) && board[y-2][x+2] == null) {
+		if (((p.isKing() && !kingedTurn)|| p.isWhite()) && (x < 6 && y > 1) && board[y-1][x+1] != null && (board[y-1][x+1].isWhite() != p.isWhite()) && board[y-2][x+2] == null) {
 			jumps.add(new Action(x, y, x+2, y-2, x+1, y-1));
 		}
 
@@ -312,13 +298,6 @@ class GameState {
 				results.add(j);
 		}
 		return results;
-
-/*		ArrayList<Action> jumps = successorState(attack).checkForDoubleJumps(attack, "test");
-		ArrayList<Action> doubleJumps = new ArrayList<Action>();
-		for (Action j : jumps) {
-			doubleJumps.add(new Action(attack, j));
-		}
-		return doubleJumps;*/
 	}
 
 	public void printState() {
