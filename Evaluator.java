@@ -49,7 +49,7 @@ class AdjacencyEvaluator extends Evaluator{
 	}
 
 	public int playerEvaluate(GameState s) {
-		player = s.getPlayerPieces();
+		player = s.getPlayersPieces();
 		int playerCount = 0;
 
 		for(int i = 0; i <= player.size(); i++){
@@ -61,12 +61,11 @@ class AdjacencyEvaluator extends Evaluator{
 				playerCount++;
 			if (doesPieceExist(player, player.get(i).getX() + 1 , player.get(i).getY() + 1) == true)
 				playerCount++;
-			return playerCount;
 		}
-
+		return playerCount;
 	}
 	public int opponentEvaluate(GameState s){
-		opponent = s.getOpponentPieces();
+		opponent = s.getOpponentsPieces();
 		int opponentCount = 0;
 
 		for(int i = 0; i <= player.size(); i++){
@@ -85,7 +84,7 @@ class AdjacencyEvaluator extends Evaluator{
 	}
 
 	public boolean doesPieceExist(ArrayList<Piece> p, int x, int y){
-		Piece temp = p.get(0).copy;
+		Piece temp = p.get(0).copy();
 		temp.setCoord(x, y);
 
 		return p.contains(temp);
