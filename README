@@ -53,18 +53,15 @@ RUNNING:
 
 ROADMAP:
 
-	-CheckersFX currently lacks an AI for the player to play against.
+	-CheckersAI needs to be improved.
 
-	-A feature needs to be added to keep track of turns. Players also need
-	to be prompted for what color they will play as.
+	-Double jumps still has a few bugs.
 
-	-Double jumps need to be added.
-
-	-The ability to restart the game after it has ended needs to be implemented.
-
-	-While units become kings when the reach the opposite side of the board,
+	-While units become kings when they reach the opposite side of the board,
 	there is currently no change to their visual representation to indicate
 	this.
+
+	-Improve the presentation of the application in general.
 
 RESOURCES:
 	The OpenJFX libraries and documentation for it are available at the

@@ -1,6 +1,6 @@
 /*	Author: Garrett Maitland
-	Version: 0.8
-	Date: November 10, 2019
+	Version: 0.9
+	Date: November 11, 2019
 */
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -27,55 +27,6 @@ public class CheckersFX extends Application {
 	private static GameLogic logic = null;
 	private static Stage primaryStage;
 	private static VBox history, availableMoves;
-
-/*	public void start(Stage stage) {
-		logic = new GameLogic();
-		primaryStage = stage;
-		//A GridPane to show the checkerboard.
-		GridPane board = new GridPane();
-
-		//Creates the tiles for the board.
-		for (int y = 0; y < 8; y++) {
-			//If the row is even, the first tile is a cosmetic tile.
-			if (y % 2 == 0) {
-				for (int x = 0; x < 8; x++) {
-					Tile tile2 = new Tile(x,y,Color.RED);
-					board.add(tile2, x, y);
-					tiles[y][x] = tile2;
-					x++;
-					Tile tile = new Tile(x, y);
-					board.add(tile, x, y);
-					tiles[y][x] = tile;
-					if (y < 3)
-						tile.addUnit(new Piece("black", Color.RED));
-					else if (y > 4)
-						tile.addUnit(new Piece("black", Color.WHITE));
-				}
-			} else {
-				//Otherwise the first tile is a usable tile.
-				for (int x = 0; x < 8; x++) {
-					Tile tile = new Tile(x, y);
-					board.add(tile, x, y);
-					tiles[y][x] = tile;
-					if (y < 3)
-						tile.addUnit(new Piece("black", Color.RED));
-					else if (y > 4)
-						tile.addUnit(new Piece("black", Color.WHITE));
-					x++;
-					Tile tile2 = new Tile(x,y,Color.RED);
-					board.add(tile2, x, y);
-					tiles[y][x] = tile2;
-				}
-			}
-		}
-
-		Scene s = new Scene(board, 640, 640);
-		primaryStage.setScene(s);
-		primaryStage.setTitle("Checkers");
-		primaryStage.show();
-
-		promptColor();
-	}*/
 
 	@Override
 	public void start(Stage stage) {
@@ -165,6 +116,26 @@ public class CheckersFX extends Application {
 		stage.show();
 	}
 
+	public void highlgiht(Action move) {
+		tiles[move.startY][move.startX].highlight();
+		tiles[move.destY][move.destX].highlight();
+		Action jump = move.getJump();
+		while (jump != null) {
+			tiles[jump.destY][jump.destX].highlight();
+			jump = jump.getJump();
+		}
+	}
+
+	public void unhighlight(Action move) {
+		tiles[move.startY][move.startX].unhighlight();
+		tiles[move.destY][move.destX].unhighlight();
+		Action jump = move.getJump();
+		while (jump != null) {
+			tiles[jump.destY][jump.destX].unhighlight();
+			jump = jump.getJump();
+		}
+	}
+
 	public void showMove(Action move) {
 		Piece movedUnit = tiles[move.startY][move.startX].removeUnit();
 		if (move.attack) {
@@ -213,6 +184,7 @@ public class CheckersFX extends Application {
 		public final int X;
 		public final int Y;
 		private Piece unit;
+		private Circle highlightCircle;
 
 		//n is the tile number and x and y
 		//are the xy-coordinates.
@@ -223,6 +195,7 @@ public class CheckersFX extends Application {
 			unit = null;
 			getChildren().add(new Rectangle(80, 80, Color.BLACK));
 			addEventFilter(MouseEvent.MOUSE_CLICKED, new TileFilter(this));
+			highlightCircle = new Circle(40, Color.rgb(255, 255, 0 ,0.5));
 		}
 
 		public Tile(int x, int y, Color c) {
@@ -262,6 +235,14 @@ public class CheckersFX extends Application {
 		public Piece getUnit() {
 			return unit;
 		}
+
+		public void highlight() {
+			getChildren().add(highlightCircle);
+		}
+
+		public void unhighlight() {
+			getChildren().remove(highlightCircle);
+		}
 	}
 
 	/*	A class to handle mouse clicks. Sends the tile
@@ -295,7 +276,29 @@ public class CheckersFX extends Application {
 		private MoveButton(Action m) {
 			super(m.toNotation());
 			move = m;
+			setOnMouseEntered(e -> highlight(move));
+			setOnMouseExited(e -> unhighlight(move));
 			setOnAction(e -> logic.makeMove(move));
+		}
+
+		public void highlight(Action move){
+			tiles[move.startY][move.startX].highlight();
+			tiles[move.destY][move.destX].highlight();
+			Action jump = move.getJump();
+			while (jump != null) {
+				tiles[jump.destY][jump.destX].highlight();
+				jump = jump.getJump();
+			}
+		}
+
+		public void unhighlight(Action move){
+			tiles[move.startY][move.startX].unhighlight();
+			tiles[move.destY][move.destX].unhighlight();
+			Action jump = move.getJump();
+			while (jump != null) {
+				tiles[jump.destY][jump.destX].unhighlight();
+				jump = jump.getJump();
+			}
 		}
 	}
 }
