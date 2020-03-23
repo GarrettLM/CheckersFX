@@ -1,6 +1,6 @@
 /*	Author: Garrett Maitland
-	Version: 0.6
-	Date: October 11, 2019
+	Version: 0.9
+	Date: November 20, 2019
 */
 import java.util.ArrayList;
 
@@ -19,39 +19,39 @@ public class GameLogic {
 		currentState = new GameState();
 		ai.newGame();
 
-		if(color.equals("White")) {
+		if (color.equals("White")) {
 			Action move = ai.nextMove();
-			game.showMove(move);
 			currentState = currentState.successorState(move);
+			game.showMove(move);
 		}
+
+		game.getAvailableMoves();
 	}
 
 	public boolean makeMove(Action move) {
-		ArrayList<Action> validMoves = null;
-		if (isValidMove(move)) {
-			game.showMove(move);
-			currentState = currentState.successorState(move);
-			if (currentState.isTerminal()) {
-				game.gameover("You win!");
-				return true;
-			}
-			move = ai.nextMove(move);
-			game.showMove(move);
-			currentState = currentState.successorState(move);
-			if (currentState.isTerminal())
-				game.gameover("You lose!");
+		currentState = currentState.successorState(move);
 
+		if (currentState.isTerminal()) {
+			game.gameover("You win!");
 			return true;
-		} else
-			return false;
+		}
+
+		move = ai.nextMove(move);
+		currentState = currentState.successorState(move);
+		game.showMove(move);
+
+		if (currentState.isTerminal())
+			game.gameover("You lose!");
+
+		currentState.printState();
+		return true;
+	}
+
+	public ArrayList<Action> getValidMoves() {
+		return currentState.possibleMoves();
 	}
 
 	public boolean isValidMove(Action move) {
-		ArrayList<Action> validMoves = currentState.possibleMoves();
-		for (Action v : validMoves) {
-			if (v.equals(move))
-				return true;
-		}
-		return false;
+		return currentState.possibleMoves().contains(move);
 	}
 }
