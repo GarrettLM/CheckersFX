@@ -1,6 +1,6 @@
 /*	Author: Garrett Maitland
-	Version: 0.6
-	Date: October 12, 2019
+	Version: 0.8
+	Date: November 10, 2019
 */
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,11 +13,13 @@ class GameState {
 	private ArrayList<Piece> playersPieces;
 	private ArrayList<Piece> opponentsPieces;
 	public final Action action;	//move that lead to the current state
+	private boolean kingedTurn;	//true if the last piece to move was kinged this turn
 
 	public GameState() {
 		playersPieces = new ArrayList<Piece>();
 		opponentsPieces = new ArrayList<Piece>();
 		board = new Piece[8][8];
+		kingedTurn = false;
 
 		//i is the row (y-coordinate) and j is the column (x-coordinate)
 		for (int i = 0; i < 3; i++) {
@@ -60,6 +62,7 @@ class GameState {
 		board = new Piece[8][8];
 		playersPieces = prevState.cloneOpponentsPieces();
 		opponentsPieces = prevState.clonePlayersPieces();
+		kingedTurn = false;
 
 		for (Piece p : playersPieces) {
 			board[p.getY()][p.getX()] = p;
@@ -69,18 +72,31 @@ class GameState {
 		}
 
 		Piece movedPiece = board[a.startY][a.startX];
+
+		Piece movedUnit = board[a.startY][a.startX];
 		board[a.startY][a.startX] = null;
-		board[a.destY][a.destX] = movedPiece;
-		movedPiece.setCoord(a.destX, a.destY);
-		if (a.destY == 0 || a.destY == 7)
-			movedPiece.makeKing();
 
 		if (a.attack) {
 			Piece attackedPiece = board[a.atkY][a.atkX];
+			while (a.hasJump()) {
+				if ((a.destY == 0 || a.destY == 7) && !movedPiece.isKing()) {
+					movedPiece.makeKing();
+					kingedTurn = true;
+				}
+				board[a.atkY][a.atkX] = null;
+				playersPieces.remove(attackedPiece);
+				a = a.getJump();
+				attackedPiece = board[a.atkY][a.atkX];
+			}
 			playersPieces.remove(attackedPiece);
 			board[a.atkY][a.atkX] = null;
 		}
-
+		movedUnit.setCoord(a.destX, a.destY);
+		board[a.destY][a.destX] = movedUnit;
+		if ((a.destY == 0 || a.destY == 7) && !movedPiece.isKing()) {
+			movedPiece.makeKing();
+			kingedTurn = true;
+		}
 	}
 
 	public ArrayList<Piece> clonePlayersPieces() {
@@ -114,6 +130,8 @@ class GameState {
 	public ArrayList<Action> possibleMoves() {
 		ArrayList<Action> actions = new ArrayList<Action>();
 		boolean forcedJump = false;
+		ArrayList<Action> doubleJumps = null;
+		Action jump = null;
 
 		for (Piece p : playersPieces) {
 			int x = p.getX();
@@ -123,28 +141,60 @@ class GameState {
 					forcedJump = true;
 					actions.clear();
 				}
-				actions.add(new Action(x, y, x-2, y+2, x-1, y+1));
+				jump = new Action(x, y, x-2, y+2, x-1, y+1);
+				doubleJumps = successorState(jump).checkForDoubleJumps(jump);
+				if (doubleJumps.isEmpty()) {
+					actions.add(jump);
+				} else {
+					for (Action j : doubleJumps) {
+						actions.add(new Action(jump, j));
+					}
+				}
 			}
 			if ((p.isKing() || p.isBlack()) && (x < 6 && y < 6) && board[y+1][x+1] != null && (board[y+1][x+1].isWhite() != p.isWhite()) && board[y+2][x+2] == null) {
 				if (!forcedJump) {
 					forcedJump = true;
 					actions.clear();
 				}
-				actions.add(new Action(x, y, x+2, y+2, x+1, y+1));
+				jump = new Action(x, y, x+2, y+2, x+1, y+1);
+				doubleJumps = successorState(jump).checkForDoubleJumps(jump);
+				if (doubleJumps.isEmpty()) {
+					actions.add(jump);
+				} else {
+					for (Action j : doubleJumps) {
+						actions.add(new Action(jump, j));
+					}
+				}
 			}
 			if ((p.isKing() || p.isWhite()) && (x > 1 && y > 1) && board[y-1][x-1] != null && (board[y-1][x-1].isWhite() != p.isWhite()) && board[y-2][x-2] == null) {
 				if (!forcedJump) {
 					forcedJump = true;
 					actions.clear();
 				}
-				actions.add(new Action(x, y, x-2, y-2, x-1, y-1));
+				jump = new Action(x, y, x-2, y-2, x-1, y-1);
+				doubleJumps = successorState(jump).checkForDoubleJumps(jump);
+				if (doubleJumps.isEmpty()) {
+					actions.add(jump);
+				} else {
+					for (Action j : doubleJumps) {
+						actions.add(new Action(jump, j));
+					}
+				}
 			}
 			if ((p.isKing() || p.isWhite()) && (x < 6 && y > 1) && board[y-1][x+1] != null && (board[y-1][x+1].isWhite() != p.isWhite()) && board[y-2][x+2] == null) {
 				if (!forcedJump) {
 					forcedJump = true;
 					actions.clear();
 				}
-				actions.add(new Action(x, y, x+2, y-2, x+1, y-1));
+				jump = new Action(x, y, x+2, y-2, x+1, y-1);
+				doubleJumps = successorState(jump).checkForDoubleJumps(jump);
+				if (doubleJumps.isEmpty()) {
+					actions.add(jump);
+				} else {
+					for (Action j : doubleJumps) {
+						actions.add(new Action(jump, j));
+					}
+				}
 			}
 			if (!forcedJump) {
 				if ((p.isKing() || p.isBlack()) && (y < 7 && x > 0) && board[y+1][x-1] == null) {
@@ -164,6 +214,92 @@ class GameState {
 		return actions;
 	}
 
+/*	public ArrayList<Action> checkForDoubleJumps(Action attack, String player) {
+		//ArrayList<Pieces> playersPieces, opponentsPieces;
+		ArrayList<Action> jumps =  new ArrayList<Action>();
+		ArrayList<Action> results = new ArrayList<Action>();
+		/*if (player.equals("black")) {
+			playersPieces = blackPieces;
+			opponentsPieces = whitePieces;
+		} else {
+			playersPieces = whitePieces;
+			opponentsPieces = whitePieces;
+		}
+		int x = attack.destX;
+		int y = attack.destY;
+		Piece p = board[y][x];
+		//System.out.println(attack.toNotation());
+		//System.out.println(p);
+		if (p == null)
+			return results;
+		if ((p.isKing() || p.isBlack()) && (x > 1 && y < 6) && board[y+1][x-1] != null && (board[y+1][x-1].isWhite() != p.isWhite()) && board[y+2][x-2] == null) {
+			jumps.add(new Action(x, y, x-2, y+2, x-1, y+1));
+		}
+		if ((p.isKing() || p.isBlack()) && (x < 6 && y < 6) && board[y+1][x+1] != null && (board[y+1][x+1].isWhite() != p.isWhite()) && board[y+2][x+2] == null) {
+			jumps.add(new Action(x, y, x+2, y+2, x+1, y+1));
+		}
+		if ((p.isKing() || p.isWhite()) && (x > 1 && y > 1) && board[y-1][x-1] != null && (board[y-1][x-1].isWhite() != p.isWhite()) && board[y-2][x-2] == null) {
+			jumps.add(new Action(x, y, x-2, y-2, x-1, y-1));
+		}
+		if ((p.isKing() || p.isWhite()) && (x < 6 && y > 1) && board[y-1][x+1] != null && (board[y-1][x+1].isWhite() != p.isWhite()) && board[y-2][x+2] == null) {
+			jumps.add(new Action(x, y, x+2, y-2, x+1, y-1));
+		}
+		for (Action j : jumps) {
+			GameState successor = successorState(j);
+			ArrayList<Action> multijump = successor.checkForDoubleJumps(attack, player);
+			if (!(multijump.isEmpty())) {
+				for (Action m : multijump) {
+					results.add(new Action(j, m));
+				}
+			} else
+				results.add(j);
+		}
+		return results;
+	}*/
+
+	public ArrayList<Action> checkForDoubleJumps(Action attack) {
+		int x = attack.destX;
+		int y = attack.destY;
+		Piece p = board[y][x];
+
+		/*System.out.println(attack.toNotation());
+		System.out.println(attack.toString());
+		System.out.println(p);*/
+
+		if (p == null) {
+			return new ArrayList<Action>();
+		}
+
+
+		ArrayList<Action> jumps =  new ArrayList<Action>();
+		ArrayList<Action> results = new ArrayList<Action>();
+
+		if (((p.isKing() && !kingedTurn)|| p.isBlack()) && (x > 1 && y < 6) && board[y+1][x-1] != null && (board[y+1][x-1].isWhite() != p.isWhite()) && board[y+2][x-2] == null) {
+			jumps.add(new Action(x, y, x-2, y+2, x-1, y+1));
+		}
+		if (((p.isKing() && !kingedTurn)|| p.isBlack()) && (x < 6 && y < 6) && board[y+1][x+1] != null && (board[y+1][x+1].isWhite() != p.isWhite()) && board[y+2][x+2] == null) {
+			jumps.add(new Action(x, y, x+2, y+2, x+1, y+1));
+		}
+		if (((p.isKing() && !kingedTurn)|| p.isWhite()) && (x > 1 && y > 1) && board[y-1][x-1] != null && (board[y-1][x-1].isWhite() != p.isWhite()) && board[y-2][x-2] == null) {
+			jumps.add(new Action(x, y, x-2, y-2, x-1, y-1));
+		}
+		if (((p.isKing() && !kingedTurn)|| p.isWhite()) && (x < 6 && y > 1) && board[y-1][x+1] != null && (board[y-1][x+1].isWhite() != p.isWhite()) && board[y-2][x+2] == null) {
+			jumps.add(new Action(x, y, x+2, y-2, x+1, y-1));
+		}
+
+		for (Action j : jumps) {
+			GameState successor = successorState(j);
+			ArrayList<Action> multijump = successor.checkForDoubleJumps(attack);
+			if (!(multijump.isEmpty())) {
+				for (Action m : multijump) {
+					results.add(new Action(j, m));
+				}
+			} else
+				results.add(j);
+		}
+		return results;
+	}
+
 	public void printState() {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
@@ -181,9 +317,16 @@ class GameState {
 			}
 			System.out.println("|");
 		}
+		System.out.println();
+	}
+
+	public void swapPlayers() {
+		ArrayList<Piece> temp = playersPieces;
+		playersPieces = opponentsPieces;
+		opponentsPieces = temp;
 	}
 
 	public boolean isTerminal() {
-		return playersPieces.isEmpty() || opponentsPieces.isEmpty();
+		return playersPieces.isEmpty() || opponentsPieces.isEmpty() || possibleMoves().isEmpty();
 	}
 }
